@@ -1,1 +1,5 @@
-package golmal
+package main
+
+func main() {
+
+}

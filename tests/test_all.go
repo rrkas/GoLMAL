@@ -2,17 +2,6 @@ package main
 
 import "github.com/rrkas/GoLMAL/tests/stats"
 
-
-func main()  {
+func main() {
 	test.TestFrequency()
 }
-
-
-
-
-
-
-
-
-
-
