@@ -3,5 +3,8 @@ package main
 import "github.com/rrkas/GoLMAL/tests/stats"
 
 func main() {
-	test.TestFrequency()
+	// tests.TestFrequency()
+	// tests.TestArithmeticMean()
+	tests.TestMedian()
+	tests.TestMode()
 }
