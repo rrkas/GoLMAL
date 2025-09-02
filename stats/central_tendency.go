@@ -2,11 +2,14 @@ package stats
 
 import (
 	"container/list"
+	"math"
 	"sort"
+
+	"github.com/rrkas/GoLMAL/utils"
 )
 
 // ArithmeticMean calculates the mean for []T or *list.List
-func ArithmeticMean[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) float64 {
+func ArithmeticMean[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
 	var sum float64
 	var count int
 
@@ -29,47 +32,32 @@ func ArithmeticMean[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) f
 	}
 
 	if count == 0 {
-		return 0
+		return 0, false
 	}
 
-	return sum / float64(count)
+	return sum / float64(count), true
 }
 
 // Median calculates the median for []T or *list.List
-func Median[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) float64 {
-	var values []float64
-
-	switch v := input.(type) {
-	case []T: // Handle slice
-		for _, item := range v {
-			values = append(values, float64(item))
-		}
-
-	case *list.List: // Handle container/list.List
-		for e := v.Front(); e != nil; e = e.Next() {
-			item := e.Value.(T) // type assert to T
-			values = append(values, float64(item))
-		}
-
-	default:
-		panic("unsupported input type: must be []T or *list.List")
-	}
+func Median[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	values := utils.ToFloat64s[T](input)
 
 	if len(values) == 0 {
-		return 0
+		return 0, false
 	}
 
 	sort.Float64s(values)
 	mid := len(values) / 2
 
 	if len(values)%2 == 0 {
-		return (values[mid-1] + values[mid]) / 2
+		return (values[mid-1] + values[mid]) / 2, true
 	}
-	return values[mid]
+
+	return values[mid], true
 }
 
 // Mode calculates the mode(s) for []T or *list.List
-func Mode[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
+func Mode[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) ([]float64, bool) {
 	freq := make(map[float64]int)
 	var maxCount int
 
@@ -97,7 +85,7 @@ func Mode[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
 	}
 
 	if len(freq) == 0 {
-		return nil
+		return nil, false
 	}
 
 	var modes []float64
@@ -107,36 +95,20 @@ func Mode[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
 		}
 	}
 
-	return modes
+	return modes, true
 }
 
 // Quantile calculates the q-th quantile (0 <= q <= 1) for []T or *list.List
 // q=0.25 -> 25th percentile, q=0.5 -> median, q=0.75 -> 75th percentile
-func Quantile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any, q float64) float64 {
+func Quantile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any, q float64) (float64, bool) {
 	if q < 0 || q > 1 {
 		panic("quantile must be between 0 and 1")
 	}
 
-	var values []float64
-
-	switch v := input.(type) {
-	case []T: // Handle slice
-		for _, item := range v {
-			values = append(values, float64(item))
-		}
-
-	case *list.List: // Handle container/list.List
-		for e := v.Front(); e != nil; e = e.Next() {
-			item := e.Value.(T)
-			values = append(values, float64(item))
-		}
-
-	default:
-		panic("unsupported input type: must be []T or *list.List")
-	}
+	values := utils.ToFloat64s[T](input)
 
 	if len(values) == 0 {
-		return 0
+		return 0, false
 	}
 
 	sort.Float64s(values)
@@ -146,77 +118,143 @@ func Quantile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any, q float
 	lower := int(pos)
 	upper := lower + 1
 	if upper >= len(values) {
-		return values[lower]
+		return values[lower], true
 	}
 	weight := pos - float64(lower)
 
-	return values[lower]*(1-weight) + values[upper]*weight
+	return values[lower]*(1-weight) + values[upper]*weight, true
 }
 
 // Quartile calculates the quartiles for []T or *list.List
-func Quartile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
+func Quartile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) ([]float64, bool) {
 	vals := []float64{}
 
-	for i := 0.0; i <= 1.0; i += 0.25 {
-		vals = append(vals, float64(Quantile[T](input, i)))
+	for i := 0; i <= 4; i++ {
+		val, success := Quantile[T](input, float64(i)/4)
+		if !success {
+			return nil, false
+		}
+		vals = append(vals, float64(val))
 	}
 
-	return vals
+	return vals, true
 }
 
 // Decile calculates the deciles for []T or *list.List
-func Decile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
+func Decile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) ([]float64, bool) {
 	vals := []float64{}
 
-	for i := 0.0; i <= 1.0; i += 0.1 {
-		vals = append(vals, float64(Quantile[T](input, i)))
+	for i := 0; i <= 10; i++ {
+		val, success := Quantile[T](input, float64(i)/10)
+		if !success {
+			return nil, false
+		}
+		vals = append(vals, float64(val))
 	}
 
-	return vals
+	return vals, true
 }
 
 // Percentile calculates the percentiles for []T or *list.List
-func Percentile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) []float64 {
+func Percentile[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) ([]float64, bool) {
 	vals := []float64{}
 
-	for i := 0.0; i <= 1.0; i += 0.01 {
-		vals = append(vals, float64(Quantile[T](input, i)))
+	for i := 0; i <= 100; i++ {
+		val, success := Quantile[T](input, float64(i)/100)
+		if !success {
+			return nil, false
+		}
+		vals = append(vals, float64(val))
 	}
 
-	return vals
+	return vals, true
 }
 
 // Range calculates the range (max-min) for []T or *list.List
 // returns -1 if input is empty
-func Range[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) float64 {
-	var values []float64
+func Range[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	values := utils.ToFloat64s[T](input)
+
+	if len(values) == 0 {
+		return 0, false
+	}
+
+	sort.Float64s(values)
+
+	return values[len(values)-1] - values[0], true
+}
+
+// InterquartileRange calculates the inter-quartile range (Q3-Q1) for []T or *list.List
+func InterquartileRange[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	q3, success := Quantile[T](input, 0.75)
+	if !success {
+		return 0, false
+	}
+	q1, success := Quantile[T](input, 0.25)
+	if !success {
+		return 0, false
+	}
+	return q3 - q1, true
+}
+
+// MeanAbsoluteDeviation calculates Mean Absolute Deviation for []T or *list.List
+func MeanAbsoluteDeviation[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	s := float64(0)
+	n := float64(0)
+
+	mean, success := ArithmeticMean[T](input)
+	if !success {
+		return 0, false
+	}
 
 	switch v := input.(type) {
 	case []T: // Handle slice
 		for _, item := range v {
-			values = append(values, float64(item))
+			s += math.Abs(float64(item) - mean)
+			n += 1
 		}
 
 	case *list.List: // Handle container/list.List
 		for e := v.Front(); e != nil; e = e.Next() {
 			item := e.Value.(T)
-			values = append(values, float64(item))
+			s += math.Abs(float64(item) - mean)
+			n += 1
 		}
 
 	default:
 		panic("unsupported input type: must be []T or *list.List")
 	}
 
-	sort.Float64s(values)
-
-	if len(values) == 0 {
-		return -1
-	}
-
-	return values[len(values)-1] - values[0]
+	return s / n, true
 }
 
-// InterquartileRange calculates the inter-quartile range (Q3-Q1) for []T or *list.List
-func InterquartileRange[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) float64 {
-	return Quantile[T](input, 0.75) - Quantile[T](input, 0.25)
+// MeanSquaredDeviation calculates Mean Squared Deviation for []T or *list.List
+func MeanSquaredDeviation[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	s := float64(0)
+	n := float64(0)
+
+	mean, success := ArithmeticMean[T](input)
+	if !success {
+		return 0, false
+	}
+
+	switch v := input.(type) {
+	case []T: // Handle slice
+		for _, item := range v {
+			s += math.Pow(float64(item)-mean, 2)
+			n += 1
+		}
+
+	case *list.List: // Handle container/list.List
+		for e := v.Front(); e != nil; e = e.Next() {
+			item := e.Value.(T)
+			s += math.Pow(float64(item)-mean, 2)
+			n += 1
+		}
+
+	default:
+		panic("unsupported input type: must be []T or *list.List")
+	}
+
+	return s / n, true
 }
