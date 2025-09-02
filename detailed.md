@@ -25,6 +25,10 @@
     1. Skewness (slice/ list)
     1. Kurtosis (slice/ list)
 
+1. **Distributions**
+    1. **Discrete**
+        1. Bernoulli (p)
+
 
 ## Tests
 
