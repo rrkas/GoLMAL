@@ -303,8 +303,8 @@ func Skewness[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float6
 	return s / float64(len(values)), nil
 }
 
-// Kurtosis calculates kurtosis for []T or *list.List
-func Kurtosis[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, error) {
+// ExcessKurtosis calculates excess kurtosis for []T or *list.List
+func ExcessKurtosis[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, error) {
 	mean, err := ArithmeticMean[T](input)
 	if err != nil {
 		return 0, err

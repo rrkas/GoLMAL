@@ -65,5 +65,5 @@ func TestCentralTendencies() {
 	fmt.Println(stats.Skewness[int](slice_int))
 
 	fmt.Println()
-	fmt.Println(stats.Kurtosis[int](slice_int))
+	fmt.Println(stats.ExcessKurtosis[int](slice_int))
 }

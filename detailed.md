@@ -23,11 +23,12 @@
     1. Variance (slice/ list)
     1. Standard Deviation (slice/ list)
     1. Skewness (slice/ list)
-    1. Kurtosis (slice/ list)
+    1. Excess Kurtosis (slice/ list)
 
 1. **Distributions**
     1. **Discrete**
         1. Bernoulli (p)
+        1. Binomial (n, p)
 
 
 ## Tests

@@ -1,9 +1,11 @@
 package main
 
-import "github.com/rrkas/GoLMAL/tests/stats"
+// import tests "github.com/rrkas/GoLMAL/tests/stats"
+import algebra "github.com/rrkas/GoLMAL/tests/algebra"
 
 func main() {
 	// tests.TestFrequency()
 	// tests.TestCentralTendencies()
-	tests.TestDistributions()
+	// tests.TestDistributions()
+	algebra.TestMatrices()
 }
