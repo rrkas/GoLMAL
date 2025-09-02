@@ -11,7 +11,7 @@ func RandomStatsData() []int {
 	// Create slice with random values
 	numbers := make([]int, length)
 	for i := range numbers {
-		numbers[i] = rand.Intn(20) // random value between 0–19
+		numbers[i] = -20 + rand.Intn(40) // random value between [-20, 19]
 	}
 
 	return numbers

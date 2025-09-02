@@ -18,7 +18,12 @@
     1. Percentile (slice/ list)
     1. Range (slice/ list)
     1. Inter-quartile Range (slice/ list)
-
+    1. Mean Absolute Deviation (slice/ list)
+    1. Mean Squared Deviation (slice/ list)
+    1. Variance (slice/ list)
+    1. Standard Deviation (slice/ list)
+    1. Skewness (slice/ list)
+    1. Kurtosis (slice/ list)
 
 
 ## Tests

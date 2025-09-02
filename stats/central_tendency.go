@@ -258,3 +258,71 @@ func MeanSquaredDeviation[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input 
 
 	return s / n, true
 }
+
+// Variance calculates variance for []T or *list.List
+func Variance[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	variance, success := MeanSquaredDeviation[T](input)
+	if !success {
+		return 0, false
+	}
+
+	return variance, true
+}
+
+// StandardDeviation calculates standard deviation for []T or *list.List
+func StandardDeviation[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	variance, success := MeanSquaredDeviation[T](input)
+	if !success {
+		return 0, false
+	}
+
+	return math.Pow(variance, 0.5), true
+}
+
+// Skewness calculates skewness for []T or *list.List
+func Skewness[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	mean, success := ArithmeticMean[T](input)
+	if !success {
+		return 0, false
+	}
+
+	std_dev, success := StandardDeviation[T](input)
+	if !success {
+		return 0, false
+	}
+
+	s := float64(0.0)
+
+	values := utils.ToFloat64s[T](input)
+
+	for _, v := range values {
+		s += math.Pow((v-mean)/std_dev, 3)
+	}
+
+	return s / float64(len(values)), true
+}
+
+// Kurtosis calculates kurtosis for []T or *list.List
+func Kurtosis[T ~int | ~int32 | ~int64 | ~float32 | ~float64](input any) (float64, bool) {
+	mean, success := ArithmeticMean[T](input)
+	if !success {
+		return 0, false
+	}
+
+	std_dev, success := StandardDeviation[T](input)
+	if !success {
+		return 0, false
+	}
+
+	s := float64(0.0)
+
+	values := utils.ToFloat64s[T](input)
+
+	for _, v := range values {
+		s += math.Pow((v-mean)/std_dev, 4)
+	}
+
+	s -= 3
+
+	return s / float64(len(values)), true
+}
