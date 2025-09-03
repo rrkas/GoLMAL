@@ -9,10 +9,11 @@ import (
 
 func TestMatrices() {
 	m1 := data.RandomTensor(0, 10, 3, 3)
-	m2 := data.RandomTensor(0, 10, 3, 3)
-	r, err := tensor.MatMul(m1, m2)
+	// m2 := data.RandomTensor(0, 10, 3, 3)
+	// r, err := tensor.MatMul(m1, m2)
 	fmt.Println(m1)
-	fmt.Println(m2)
-	fmt.Println(r)
-	fmt.Println(err)
+	// fmt.Println(m2)
+	// fmt.Println(r)
+	// fmt.Println(err)
+	fmt.Println(tensor.Inv(m1))
 }

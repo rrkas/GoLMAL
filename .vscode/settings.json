@@ -3,9 +3,11 @@
         "dists",
         "gofmt",
         "gonum",
+        "gorgonia",
         "gota",
         "Interquartile",
         "LMAL",
+        "Penrose",
         "rrkas"
     ]
 }
